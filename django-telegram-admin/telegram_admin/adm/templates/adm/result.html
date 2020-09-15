@@ -1,0 +1,51 @@
+{% extends "adm/base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <h2>Список с результатами работы старших смен</h2>
+</div>
+<div class="row my-2">
+  <h4>Проверяющий : {{ info.user.name }}</h4>
+</div>
+<div class="row">
+  <h4>Дата и время начала смены: {{ info.date|date:"d M Y, H:i" }} </h4>
+</div>
+<div class="row mt-2">
+  <div class="col-md-8">
+    <table class="table table-striped table-responsive-md">
+  <thead>
+    <tr>
+      <th scope="col"><h6>Категория</h6></th>
+      <th scope="col"><h6>Время</h6></th>
+      <th scope="col"><h6>Объект контроля</h6></th>
+      <th scope="col"><h6>Результат</h6></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in result %}
+    <tr>
+      <td><h6>{{ item.category }}</h6></td>
+      <td><h6>{{ item.date|date:"H:i" }}</h6></td>
+      <td><h6>{{ item.question.text }}</h6></td>
+      <td>
+        {% if item.result %}
+        <p>✔</p>
+        {% endif %}
+        {% if not item.result %}
+        <p>❌</p>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+  </div>
+</div>
+<div class="row">
+  <a href="/" class="btn btn-primary">Назад</a>
+</div>
+
+
+{% endblock %}
