@@ -23,10 +23,7 @@ async def show_menu(message: types.Message, state: FSMContext):
     # Выполним функцию, которая отправит пользователю кнопки с доступными сменами
     await list_shifts(message)
     await States.shift_start.set()
-    await add_shift()
-    shift_id = await get_cur_shift()
-    async with state.proxy() as data:
-        data['shift_id'] = shift_id
+
 
 
 async def list_shifts(message: types.Message, **kwargs):
@@ -45,17 +42,23 @@ async def list_categories(callback: CallbackQuery, state: FSMContext, callback_d
 
     async with state.proxy() as data:
         if callback_data.get('user') != '0':  # Добавляем юзера в смену
+            try:
+                print(callback_data['user'], 'CD USER ID!!!')
+                await add_shift()
+            except Exception as e:
+                print(e)
+            print('Смена начата')
+            shift_id = await get_cur_shift()
             user: int = int(callback_data.get('user'))
-            shift_id: int = data.get('shift_id')
             await update_shift(shift_id, user)
-
-        if callback_data['user'] != '0':
             data['user'] = callback_data['user']
         res = await bool_res(callback_data.get('res'))
         if data.get('question_id') and callback_data.get('question_id') != 'dummy':
             date = datetime.datetime.now()
+            shift_id = await get_cur_shift()
+            print(shift_id, 'SHIFT ID!!!')
             await add_result(
-                shift_id=data.get('shift_id'),
+                shift_id=shift_id,
                 user_id=int(data.get('user')),
                 date=date,
                 category=str(data.get('category')),
@@ -120,10 +123,14 @@ async def finish_shift(call: CallbackQuery, state: FSMContext):
     cur_shift = await get_cur_shift()
     result = await count_positive_results(cur_shift)
     res_str = str(result)
-    prev_score = await count_positive_results_prev_shift()
     async with state.proxy() as data:
         user_id = int(data['user'])
         user_name = await get_user_first_name(user_id)
+        try:
+            prev_score = await count_positive_results_prev_shift(user_id)
+        except IndexError:
+            prev_score = 0
+
         if res_str[-1] == '1':
             await call.message.answer(f"{user_name},cпасибо за работу! Вы набрали 🔥{result}🔥 балл за сегодняшнюю смену \n" \
             f"За прошлую смену вы набрали 🔥{prev_score}🔥 положительных результатов.")
@@ -136,9 +143,9 @@ async def finish_shift(call: CallbackQuery, state: FSMContext):
             await call.message.answer(f"{user_name},cпасибо за работу! Вы набрали 🔥{result}🔥 баллов за сегодняшнюю смену \n" \
             f"За прошлую смену вы набрали 🔥{prev_score}🔥 положительных результатов.")
 
-    # await call.message.answer(f"В следующую смену обратите внимание на следующие моменты:{}")
 
     await state.reset_state()
+    await call.message.answer("Результаты вы можете посмотреть по адресу http://185.119.58.63/")
     await call.message.answer("Чтобы начать новую смену введите команду /menu")
 
 

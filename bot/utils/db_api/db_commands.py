@@ -57,7 +57,10 @@ async def add_result(**kwargs):
 
 async def get_cur_shift():
     shift = await Shift.query.gino.all()
-    cur_shift = shift[-1].id
+    try:
+        cur_shift = shift[-1].id
+    except IndexError:
+        cur_shift = shift[0].id
     return cur_shift
 
 
@@ -91,8 +94,8 @@ async def count_positive_results(shift_id):
     await shift.update(score=total).apply()
     return total
 
-async def count_positive_results_prev_shift():
-    shifts = await Shift.query.gino.all()
+async def count_positive_results_prev_shift(user_id):
+    shifts = await Shift.query.where(Shift.user_id == user_id).gino.all()
     prev_score = shifts[-2].score
     return prev_score
 

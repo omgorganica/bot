@@ -23,17 +23,64 @@
     <tr>
       <th scope="row"> <a href="{% url 'result' shift.id%}"><h6>{{ shift.id }}</h6></a></th>
       <td><a href="{% url 'result' shift.id %}"><h6>{{ shift.date|date:"d M Y, H:i" }}</h6></a></td>
-      <td><a href="{% url 'result' shift.id %}"><h6>{{ shift.user.name }}</h6></a></td>
+      <td><a href="{% url 'user_result' shift.user_id %}"><h6>{{ shift.user.name }}</h6></a></td>
       <td><a href="{% url 'result' shift.id %}"><h6>🔥 {{ shift.score }}</h6></a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
   </div>
+  <div class="col-md-6">
+    <!-- Graph -->
+  <canvas id="myChart" width="200" height="200"></canvas>
+    <script>
+      $(document).ready(function(){
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|safe }} ,
+                datasets: [{
+                    label: 'Количество баллов по датам',
+                    data: {{ data|safe }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+      });
+    </script>
+    <!-- Graph -->
+  </div>
 </div>
+
+
 <div class="row">
     {% bootstrap_pagination shift_list pages_to_show=5 %}
-</div>
 </div>
 
 
